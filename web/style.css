@@ -190,7 +190,8 @@ body {
     transition: background 0.07s;
 }
 .cell.on {
-    background: var(--cell-on);
+    /* 배경색은 app.js에서 픽셀별 인라인 스타일로 적용됨 */
+    outline: 1px solid rgba(0,0,0,0.1);
 }
 .cell:hover { opacity: 0.75; }
 

@@ -14,7 +14,6 @@ sense = SenseHat()
 sense.set_rotation(180)
 
 # 기본값 설정
-current_color = (255, 255, 255)
 current_raw_sentence = [] # 0과 1로 구성된 매트릭스 리스트
 scroll_speed = 0.1
 current_padding = 0 # 단어 간 패딩 (0~8)
@@ -29,53 +28,44 @@ app = Flask(__name__)
 CORS(app)
 
 # --- 캔버스 재구성 함수 ---
-def rebuild_canvas(raw_sentence, color, padding_size):
-    """0, 1 데이터를 실제 RGB 값으로 변환하여 full_canvas 생성"""
+def rebuild_canvas(raw_sentence, padding_size):
+    """각 픽셀이 [R, G, B] 리스트인 데이터를 받아 full_canvas 생성"""
     global full_canvas, total_w
     
-    X = (0, 0, 0)
-    O = color
+    black_pixel = [0, 0, 0]
     
-    # 0/1 매트릭스를 RGB 매트릭스로 변환
-    processed_sentence = []
-    for matrix in raw_sentence:
-        rgb_matrix = [O if pixel == 1 else X for pixel in matrix]
-        processed_sentence.append(rgb_matrix)
-    
-    if not processed_sentence:
-        full_canvas = [X] * 64
+    if not raw_sentence:
+        full_canvas = [black_pixel] * 64
         total_w = 8
         return
 
     # 각 행 단위로 단어+패딩을 이어 붙임
     new_canvas = []
     for r in range(8):
-        for word in processed_sentence:
-            new_canvas.extend(word[r*8 : (r+1)*8])
-            new_canvas.extend([X] * padding_size)
+        for word in raw_sentence:
+            row_pixels = word[r*8 : (r+1)*8]
+            new_canvas.extend(row_pixels)
+            new_canvas.extend([black_pixel] * padding_size)
             
     full_canvas = new_canvas
-    total_w = (8 + padding_size) * len(processed_sentence)
+    total_w = (8 + padding_size) * len(raw_sentence)
 
 # --- Flask API 경로 ---
 @app.route('/update', methods=['POST'])
 def update_led():
-    global current_color, current_raw_sentence, scroll_speed, current_padding, data_changed
+    global current_raw_sentence, scroll_speed, current_padding, data_changed
     
     data = request.json
     
     try:
         with lock:
-            # 1. 색상 업데이트 [R, G, B]
-            current_color = tuple(data.get('color', [255, 255, 255]))
-            
-            # 2. 문장 업데이트 (리스트 내 리스트 형태)
+            # 1. 문장 업데이트 (각 원소가 [R, G, B] 리스트)
             current_raw_sentence = data.get('sentence', [])
             
-            # 3. 스크롤 속도 업데이트
+            # 2. 스크롤 속도 업데이트
             scroll_speed = data.get('scroll_speed', 0.1)
 
-            # 패딩 값 업데이트 (0~8)
+            # 3. 패딩 값 업데이트 (0~8)
             current_padding = max(0, min(8, data.get('padding', 0))) 
             
             data_changed = True
@@ -94,7 +84,7 @@ def main():
     global data_changed, full_canvas, total_w, scroll_speed, current_padding
     
     # 초기 캔버스 빌드 (비어있음 방지)
-    rebuild_canvas([], current_color, current_padding)
+    rebuild_canvas(current_raw_sentence, current_padding)
     
     offset = 0
     try:
@@ -106,7 +96,7 @@ def main():
             # 데이터 변경 확인 및 반영
             if data_changed:
                 with lock:
-                    rebuild_canvas(current_raw_sentence, current_color, current_padding)
+                    rebuild_canvas(current_raw_sentence, current_padding)
                     offset = 0 # 새 문장이 오면 처음부터 시작
                     data_changed = False
             
