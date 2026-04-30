@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LED Matrix Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Title Bar -->
+  <div class="title-bar">
+    <div class="logo-dot"></div>
+    <h1>LED Matrix Controller</h1>
+    <div class="ip-input-wrap">
+      <label>RASPI IP</label>
+      <input type="text" id="raspi-ip" value="172.20.10.7" placeholder="192.168.x.x" />
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-card">
+
+    <!-- Editor Panel -->
+    <div class="editor-panel">
+      <div class="editor-header">
+        <button class="btn" id="btn-reset">RESET</button>
+        <div class="frame-indicator">
+          FRAME &nbsp;<span id="frame-cur">1</span>&nbsp;/&nbsp;<span id="frame-total">1</span>
+        </div>
+      </div>
+
+      <div class="grid-nav-row">
+        <button class="nav-btn" id="btn-prev" title="이전 프레임">&#9664;</button>
+        <div class="grid-wrapper">
+          <div id="led-grid"></div>
+        </div>
+        <button class="nav-btn" id="btn-next" title="다음 프레임">&#9654;</button>
+      </div>
+
+      <div class="editor-footer">
+        <button class="btn" id="btn-add">ADD</button>
+        <button class="btn btn-danger" id="btn-delete">DELETE</button>
+      </div>
+
+      <div class="editor-footer io-row">
+        <button class="btn btn-io" id="btn-save">&#8595; SAVE JSON</button>
+        <button class="btn btn-io" id="btn-load">&#8593; LOAD JSON</button>
+        <input type="file" id="file-input" accept=".json" style="display:none;" />
+      </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+
+      <!-- Preview -->
+      <div class="preview-block">
+        <div class="preview-label">Preview</div>
+        <canvas id="preview-canvas" width="212" height="212"></canvas>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="color-block">
+        <div class="control-label">Color</div>
+        <div class="color-row">
+          <input type="color" id="color-picker" value="#00e5ff" />
+          <input type="text"  id="color-hex"    value="#00E5FF" class="color-hex" maxlength="7" />
+        </div>
+      </div>
+
+      <!-- Scroll Speed -->
+      <div class="speed-block">
+        <div class="control-label">
+          Scroll Speed
+          <span class="speed-value" id="speed-display">0.07</span>
+        </div>
+        <input type="range" id="scroll-speed" min="0.01" max="0.30" step="0.01" value="0.07" />
+      </div>
+
+      <!-- Padding -->
+      <div class="speed-block">
+        <div class="control-label">
+          Padding
+          <span class="speed-value" id="padding-display">0</span>
+        </div>
+        <div class="padding-input-row">
+          <input type="range" id="padding-input" min="0" max="8" step="1" value="0" />
+        </div>
+        <div class="padding-tick-row">
+          <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+          <span>5</span><span>6</span><span>7</span><span>8</span>
+        </div>
+      </div>
+
+      <!-- Send -->
+      <div class="send-block">
+        <button class="btn-send" id="btn-send">SEND</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-msg">준비</span>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
